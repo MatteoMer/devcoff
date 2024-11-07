@@ -55,8 +55,12 @@ export default function InputPage(props: ScriptProps) {
                         });
                         console.log(name, email)
                         const data = await res.json()
-                        openZupassPopupUrl(data.url)
-                        setEmailContent("generated ticket")
+                        if (!data.existingTicket) {
+                            openZupassPopupUrl(data.url)
+                            setEmailContent("generated ticket")
+                        } else {
+                            setEmailContent("ticket already been generated before. if you lost it, contact @Matteo_Mer on tg")
+                        }
                     }
                     setIsDisabled(false)
 
