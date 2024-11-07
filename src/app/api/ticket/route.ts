@@ -110,7 +110,7 @@ export async function POST(req: Request) {
 
         // Parse the incoming request body
         const body = await req.json()
-        const { proof, name, email } = body
+        const { proof, name, email, isInviting } = body
 
         if (!proof) {
             return NextResponse.json(
@@ -120,7 +120,12 @@ export async function POST(req: Request) {
         }
 
         // Generate ticket ID from proof
-        const ticketId = createDeterministicUUIDv4(proof['publicOutput']);
+        let ticketId;
+        if (isInviting) {
+            ticketId = createDeterministicUUIDv4(proof['publicOutput'] + 'ref'); //creates a new uuid for invitee
+        } else {
+            ticketId = createDeterministicUUIDv4(proof['publicOutput']);
+        }
 
         // Check if ticket already exists
         const existingTicket = await db.get(
@@ -143,7 +148,6 @@ export async function POST(req: Request) {
         const isValid = await executeVerifyCommand(proof['proof'], proof['publicOutput'])
         console.log(`isValid?`, isValid)
 
-        const encoded = Buffer.from(JSON.stringify(proof['publicOutput'])).toString('base64');
         console.log(createDeterministicUUIDv4(proof['publicOutput']))
         // zupass ticket
         const privateKey = newEdDSAPrivateKey()
@@ -152,15 +156,13 @@ export async function POST(req: Request) {
         // Prepare the event ticket to sign.
         // The following are just dummy values used for testing.
 
-
-
         const ticketData: ITicketData = {
             attendeeName: name,
             attendeeEmail: email,
             eventName: "event",
             ticketName: "ticket",
             checkerEmail: undefined,
-            ticketId: createDeterministicUUIDv4(proof['publicOutput']),
+            ticketId,
             eventId: uuidv4(),
             productId: uuidv4(),
             timestampConsumed: 0,

@@ -22,6 +22,8 @@ export default function InputPage(props: ScriptProps) {
     const [isFormValid, setIsFormValid] = useState(false);
     const [file, setFile] = useState<File | null>(null);
     const [isDisabled, setIsDisabled] = useState(false);
+    const [isInviting, setIsInviting] = useState(false);
+
 
 
     useEffect(() => {
@@ -50,16 +52,19 @@ export default function InputPage(props: ScriptProps) {
                             body: JSON.stringify({
                                 proof,
                                 name,
-                                email
+                                email,
+                                isInviting
                             }),
                         });
                         console.log(name, email)
                         const data = await res.json()
                         if (!data.existingTicket) {
-                            openZupassPopupUrl(data.url)
+                            if (isInviting) { setEmailContent(`Your ticket for ${name}has been generated. Can be claimed at this url by your friend! ${data.url}`) } else {
+                                openZupassPopupUrl(data.url)
+                            }
                             setEmailContent("generated ticket")
                         } else {
-                            setEmailContent("ticket already been generated before. if you lost it, contact @Matteo_Mer on tg")
+                            setEmailContent("ticket already been generated before. if you lost it, contact @Matteo_Mer or @s0lness on tg")
                         }
                     }
                     setIsDisabled(false)
@@ -124,7 +129,19 @@ export default function InputPage(props: ScriptProps) {
             <form onSubmit={handleSubmit}>
                 <div>
                     <label>
-                        Name:
+                        Invite someone else
+                        <input
+                            type="checkbox"
+                            checked={isInviting}
+                            onChange={(e) => setIsInviting(e.target.checked)}
+                            disabled={isDisabled}
+                        />
+                    </label>
+                </div>
+                <div>
+                    <label>
+                        {isInviting ? "Invitee's name:" : "Your name:"}
+
                         <input
                             type="text"
                             value={name}
@@ -137,7 +154,7 @@ export default function InputPage(props: ScriptProps) {
 
                 <div>
                     <label>
-                        Email:
+                        {isInviting ? "Invitee's email:" : "Your email:"}
                         <input
                             type="email"
                             value={email}
