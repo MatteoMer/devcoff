@@ -1,5 +1,5 @@
 {
-  "name": "devcoff-front",
+  "name": "devcoff",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,16 +9,26 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "react": "19.0.0-rc-02c0e824-20241028",
-    "react-dom": "19.0.0-rc-02c0e824-20241028",
-    "next": "15.0.2"
+    "@next/env": "^15.0.2",
+    "@pcd/eddsa-pcd": "^0.10.0",
+    "@pcd/eddsa-ticket-pcd": "^0.10.0",
+    "@pcd/passport-interface": "^0.15.0",
+    "@types/snarkjs": "^0.7.8",
+    "@zk-email/zk-email-sdk": "^1.0.5",
+    "child_process": "^1.0.2",
+    "dotenv": "^16.4.5",
+    "fs": "^0.0.1-security",
+    "libsodium-sumo": "^0.7.15",
+    "next": "^15.0.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "snarkjs": "^0.7.5",
+    "uuid": "^11.0.2"
   },
   "devDependencies": {
-    "typescript": "^5",
     "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "eslint": "^8",
-    "eslint-config-next": "15.0.2"
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "typescript": "^5"
   }
 }
