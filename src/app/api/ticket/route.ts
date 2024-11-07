@@ -87,7 +87,7 @@ export async function POST(req: Request) {
     try {
         // Parse the incoming request body
         const body = await req.json()
-        const { proof } = body
+        const { proof, name, email } = body
 
         if (!proof) {
             return NextResponse.json(
@@ -97,6 +97,7 @@ export async function POST(req: Request) {
         }
 
         console.log(JSON.stringify(proof))
+        console.log(`name: ${name}, email: ${email}`)
 
         const isValid = await executeVerifyCommand(proof['proof'], proof['publicOutput'])
         console.log(`isValid?`, isValid)
@@ -113,8 +114,8 @@ export async function POST(req: Request) {
 
 
         const ticketData: ITicketData = {
-            attendeeName: "test name",
-            attendeeEmail: "user@test.com",
+            attendeeName: name,
+            attendeeEmail: email,
             eventName: "event",
             ticketName: "ticket",
             checkerEmail: undefined,

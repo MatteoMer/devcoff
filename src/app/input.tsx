@@ -17,11 +17,21 @@ export default function InputPage(props: ScriptProps) {
         inputWorkers
     } = useZkEmailSDK();
     const [externalInputs, setExternalInputs] = useState<Record<string, string>>({});
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [isFormValid, setIsFormValid] = useState(false);
+    const [file, setFile] = useState<File | null>(null);
+    const [isDisabled, setIsDisabled] = useState(false);
+
 
     useEffect(() => {
-
         createInputWorker("saugardev/devcon-rejection-proof")
     }, [])
+
+    useEffect(() => {
+        // Validate form whenever name or email changes
+        setIsFormValid(name.trim() !== '' && email.includes('@'));
+    }, [name, email]);
 
 
     useEffect(() => {
@@ -37,26 +47,42 @@ export default function InputPage(props: ScriptProps) {
                             headers: {
                                 'Content-Type': 'application/json',
                             },
-                            body: JSON.stringify({ proof }),
+                            body: JSON.stringify({
+                                proof,
+                                name,
+                                email
+                            }),
                         });
+                        console.log(name, email)
                         const data = await res.json()
                         openZupassPopupUrl(data.url)
                         setEmailContent("generated ticket")
                     }
+                    setIsDisabled(false)
 
                     verifyAndGenerateTicket()
 
 
+                } else {
+                    setIsDisabled(true)
                 }
             }
         }
     }, [proofStatus])
 
-    const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const handleSubmit = async (event: FormEvent) => {
+        event.preventDefault()
+        if (!isFormValid) {
+            setEmailContent('Please fill in all required fields');
+            return;
+        }
+        if (!file) {
+            setEmailContent('Please select a file');
+            return;
+        }
+
+
         setExternalInputs({})
-        const file = event.target.files?.[0];
-        if (!file) return;
-        setEmailContent('');
 
         try {
             const text = await file.text();
@@ -77,6 +103,13 @@ export default function InputPage(props: ScriptProps) {
         }
     };
 
+    const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const selectedFile = event.target.files?.[0];
+        if (selectedFile) {
+            setFile(selectedFile);
+        }
+    };
+
 
     return (
         <div>
@@ -84,20 +117,53 @@ export default function InputPage(props: ScriptProps) {
             <p>Got rejected for a talk at Devcon? join us for a side-event!</p>
             <p>Using <a href="https://prove.email">zk-email</a> we can easily prove that someone got rejected from Devcon. From there we generate a zupass ticket! And then we have fun!</p>
 
-            <div>
-                <p>Upload your Devcon rejection email (.eml file):</p>
-                <input
-                    type="file"
-                    accept=".eml"
-                    onChange={handleFileChange}
-                />
-            </div>
+            <form onSubmit={handleSubmit}>
+                <div>
+                    <label>
+                        Name:
+                        <input
+                            type="text"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            required
+                            disabled={isDisabled}
+                        />
+                    </label>
+                </div>
+
+                <div>
+                    <label>
+                        Email:
+                        <input
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                            disabled={isDisabled}
+                        />
+                    </label>
+                </div>
+
+                <div>
+                    <p>Upload your Devcon rejection email (.eml file):</p>
+                    <input
+                        type="file"
+                        accept=".eml"
+                        onChange={handleFileChange}
+                        disabled={isDisabled}
+                    />
+                </div>
+
+                <button
+                    type="submit"
+                    disabled={isDisabled}
+                >Submit</button>
+            </form>
 
             {emailContent && (
-                <p style={{ marginTop: '1rem' }}>
+                <p>
                     {emailContent}
                 </p>
             )}
-        </div >
-    )
+        </div>)
 }
