@@ -14,27 +14,23 @@ import { newEdDSAPrivateKey } from "@pcd/eddsa-pcd"
 import { ArgumentTypeName } from "@pcd/pcd-types"
 import crypto from 'crypto';
 import { constructZupassPcdAddRequestUrl, constructZupassPcdProveAndAddRequestUrl } from '@pcd/passport-interface'
-import sqlite3 from 'sqlite3'
-import { open } from 'sqlite'
+import { sql } from '@vercel/postgres'
 
 // Initialize database
 const initializeDb = async () => {
-    const db = await open({
-        filename: 'tickets.db',
-        driver: sqlite3.Database
-    });
-
-    await db.exec(`
-        CREATE TABLE IF NOT EXISTS tickets (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            ticket_id TEXT UNIQUE,
-            name TEXT,
-            email TEXT,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-    `);
-
-    return db;
+    try {
+        await sql`
+            CREATE TABLE IF NOT EXISTS tickets (
+                id SERIAL PRIMARY KEY,
+                ticket_id TEXT UNIQUE,
+                name TEXT,
+                email TEXT,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            )
+        `;
+    } catch (error) {
+        console.error('Failed to create table:', error);
+    }
 };
 
 function createDeterministicUUIDv4(publicOutput: any): string {
@@ -106,7 +102,7 @@ async function executeVerifyCommand(proof: any, publicOutput: any) {
 
 export async function POST(req: Request) {
     try {
-        const db = await initializeDb();
+        await initializeDb();
 
         // Parse the incoming request body
         const body = await req.json()
@@ -128,12 +124,11 @@ export async function POST(req: Request) {
         }
 
         // Check if ticket already exists
-        const existingTicket = await db.get(
-            'SELECT * FROM tickets WHERE ticket_id = ?',
-            [ticketId]
-        );
+        const existingTicket = await sql`
+            SELECT * FROM tickets WHERE ticket_id = ${ticketId}
+        `;
 
-        if (existingTicket) {
+        if (existingTicket.rows.length > 0) {
             return NextResponse.json({
                 status: 'success',
                 message: 'Ticket already exists',
@@ -173,10 +168,10 @@ export async function POST(req: Request) {
             ticketCategory: 1
         }
 
-        await db.run(
-            'INSERT INTO tickets (ticket_id, name, email) VALUES (?, ?, ?)',
-            [ticketId, name, email]
-        );
+        await sql`
+            INSERT INTO tickets (ticket_id, name, email)
+            VALUES (${ticketId}, ${name}, ${email})
+        `;
 
         const url = constructZupassPcdProveAndAddRequestUrl<typeof EdDSATicketPCDPackage>(
             "https://staging.zupass.org",
