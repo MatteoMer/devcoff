@@ -1,0 +1,27 @@
+{
+  "name": "devcoff-bot",
+  "version": "1.0.0",
+  "description": "Devcoff telegram bot for private chats",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "node dist/index.js",
+    "build": "tsc",
+    "dev": "nodemon src/index.ts"
+  },
+  "dependencies": {
+    "@pcd/eddsa-pcd": "^0.10.0",
+    "@pcd/passport-interface": "^0.15.0",
+    "dotenv": "^16.4.5",
+    "reflect-metadata": "^0.2.2",
+    "sqlite3": "^5.1.7",
+    "telegraf": "^4.16.3",
+    "typeorm": "^0.3.20",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "nodemon": "^3.1.7",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3"
+  }
+}

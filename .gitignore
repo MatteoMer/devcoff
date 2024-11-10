@@ -2,6 +2,8 @@
 
 # dependencies
 /node_modules
+/telegram/node_modules
+/telegram/logs
 /.pnp
 .pnp.*
 .yarn/*
