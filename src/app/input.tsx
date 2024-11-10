@@ -23,6 +23,8 @@ export default function InputPage(props: ScriptProps) {
     const [file, setFile] = useState<File | null>(null);
     const [isDisabled, setIsDisabled] = useState(false);
     const [isInviting, setIsInviting] = useState(false);
+    const [telegramLink, setTelegramLink] = useState('');
+    const [zupassLink, setZupassLink] = useState('');
 
 
 
@@ -40,7 +42,7 @@ export default function InputPage(props: ScriptProps) {
         if (Object.keys(proofStatus).length > 0) {
             for (const [key, proof] of Object.entries(proofStatus)) {
                 console.log(proof.status, proof.estimatedTimeLeft / 60)
-                setEmailContent(`generating proof, time remaning: ${proof.estimatedTimeLeft / 60}`);
+                setEmailContent(`generating proof, time remaning: ${Math.floor(proof.estimatedTimeLeft / 60)}:${Math.floor(proof.estimatedTimeLeft % 60).toString().padStart(2, '0')}`);
                 if (proof.status == 'COMPLETED') {
                     setEmailContent("proof computed: generating ticket")
                     const verifyAndGenerateTicket = async () => {
@@ -63,6 +65,8 @@ export default function InputPage(props: ScriptProps) {
                                 openZupassPopupUrl(data.url)
                             }
                             setEmailContent("generated ticket")
+                            setTelegramLink(data.tgLink)
+                            setZupassLink(data.url)
                         } else {
                             setEmailContent("ticket already been generated before. if you lost it, contact @Matteo_Mer or @s0lness on tg")
                         }
@@ -166,7 +170,7 @@ export default function InputPage(props: ScriptProps) {
                 </div>
 
                 <div>
-                    <p>Upload your Devcon rejection email (.eml file):</p>
+                    <p>Upload your Devcon rejection email (<a href="https://help.salesforce.com/s/articleView?id=000389554&type=1" target="_blank">.eml file</a>):</p>
                     <input
                         type="file"
                         accept=".eml"
@@ -186,5 +190,17 @@ export default function InputPage(props: ScriptProps) {
                     {emailContent}
                 </p>
             )}
+
+            {zupassLink && (
+                <p>
+                    If the popup did not open, you can add the ticket on zupass <a target="_blank" href={zupassLink}>here</a>
+                </p>
+            )}
+            {telegramLink && (
+                <p> Join the telegram of the group <a target="_blank" href={telegramLink}>here</a> </p>
+            )}
+            <p>
+                contact @Matteo_Mer or @s0lness on tg for any questions or bug!
+            </p>
         </div>)
 }

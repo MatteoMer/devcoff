@@ -145,8 +145,6 @@ export async function POST(req: Request) {
 
         console.log(createDeterministicUUIDv4(proof['publicOutput']))
         // zupass ticket
-        const privateKey = newEdDSAPrivateKey()
-        console.log(`privateKey:`, privateKey)
 
         // Prepare the event ticket to sign.
         // The following are just dummy values used for testing.
@@ -154,12 +152,12 @@ export async function POST(req: Request) {
         const ticketData: ITicketData = {
             attendeeName: name,
             attendeeEmail: email,
-            eventName: "event",
-            ticketName: "ticket",
+            eventName: "Devcoff",
+            ticketName: "gathering",
             checkerEmail: undefined,
             ticketId,
-            eventId: uuidv4(),
-            productId: uuidv4(),
+            eventId: process.env.EVENT_ID || '',
+            productId: process.env.PRODUCT_ID || "",
             timestampConsumed: 0,
             timestampSigned: Date.now(),
             attendeeSemaphoreId: "12345",
@@ -188,7 +186,7 @@ export async function POST(req: Request) {
                 },
                 privateKey: {
                     argumentType: ArgumentTypeName.String,
-                    value: privateKey
+                    value: process.env.PRIVATE_KEY || ""
                 }
             },
             { title: "Devcoff" },
@@ -203,6 +201,7 @@ export async function POST(req: Request) {
             status: 'success',
             message: 'Proof verified successfully',
             url: url,
+            tgLink: process.env.TG_LINK,
         })
 
     } catch (error) {
